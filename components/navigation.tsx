@@ -8,9 +8,11 @@ export default function Navigation() {
   const pathname = usePathname()
 
   const links = [
-    { href: "/", label: "hjem" },
-    { href: "/om-meg", label: "om meg" },
-    { href: "/prosjekter", label: "prosjekter" },
+    { href: "/", label: "hjem", hidden: false },
+    { href: "/innholdslekeplass", label: "innholdslekeplass", hidden: false },
+    { href: "/om-meg", label: "om meg", hidden: false },
+    { href: "/prosjekter", label: "prosjekter", hidden: false },
+    { href: "/prosjekt-uxhanne", label: "prosjekt uxhanne", hidden: false },
   ]
 
   return (
@@ -20,29 +22,31 @@ export default function Navigation() {
           uxhanne.no
         </Link>
         <ul className="flex space-x-8">
-          {links.map((link) => {
-            const isActive = pathname === link.href
+          {links
+            .filter((link) => !link.hidden)
+            .map((link) => {
+              const isActive = pathname === link.href
 
-            return (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className={`relative text-sm font-medium transition-colors ${
-                    isActive ? "text-green-600" : "text-gray-600 hover:text-green-500"
-                  }`}
-                >
-                  {link.label}
-                  {isActive && (
-                    <motion.div
-                      layoutId="underline"
-                      className="absolute -bottom-1 left-0 h-0.5 w-full bg-green-400"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                </Link>
-              </li>
-            )
-          })}
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className={`relative text-sm font-medium transition-colors ${
+                      isActive ? "text-emerald-800" : "text-gray-600 hover:text-emerald-700"
+                    }`}
+                  >
+                    {link.label}
+                    {isActive && (
+                      <motion.div
+                        layoutId="underline"
+                        className="absolute -bottom-1 left-0 h-0.5 w-full bg-emerald-600"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                  </Link>
+                </li>
+              )
+            })}
         </ul>
       </div>
     </nav>

@@ -4,62 +4,12 @@ import { useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import Navigation from "@/components/navigation"
 import { setupAnimatedBackground } from "@/utils/animated-background"
-import { ArrowUpRight } from "lucide-react"
-
-// Placeholder prosjektdata
-const prosjekter = [
-  {
-    id: 1,
-    tittel: "Lorem ipsum dolor sit amet",
-    beskrivelse: "En komplett redesign av en nettbankløsning med fokus på brukervennlighet og tilgjengelighet.",
-    bilde: "/placeholder.svg?height=400&width=600",
-    kategorier: ["UX Design", "UI Design", "Brukerundersøkelse"],
-    år: "2023",
-  },
-  {
-    id: 2,
-    tittel: "Consectetur adipiscing elit",
-    beskrivelse: "Design av en mobilapplikasjon for pasienter og helsepersonell med fokus på enkel kommunikasjon.",
-    bilde: "/placeholder.svg?height=400&width=600",
-    kategorier: ["App Design", "Helsesektor", "UX Research"],
-    år: "2022",
-  },
-  {
-    id: 3,
-    tittel: "Sed do eiusmod tempor",
-    beskrivelse: "Utvikling av brukergrensesnitt og brukeropplevelse for en moderne e-handelsplattform.",
-    bilde: "/placeholder.svg?height=400&width=600",
-    kategorier: ["E-handel", "UI Design", "Konverteringsoptimalisering"],
-    år: "2022",
-  },
-  {
-    id: 4,
-    tittel: "Incididunt ut labore et dolore",
-    beskrivelse: "Utvikling av et omfattende designsystem for digitale tjenester i offentlig sektor.",
-    bilde: "/placeholder.svg?height=400&width=600",
-    kategorier: ["Designsystem", "Offentlig sektor", "Tilgjengelighet"],
-    år: "2021",
-  },
-  {
-    id: 5,
-    tittel: "Magna aliqua ut enim",
-    beskrivelse: "Design av en intuitiv reiseplanlegger med fokus på personalisering og inspirasjon.",
-    bilde: "/placeholder.svg?height=400&width=600",
-    kategorier: ["UX Design", "Reise", "Personalisering"],
-    år: "2021",
-  },
-  {
-    id: 6,
-    tittel: "Quis nostrud exercitation",
-    beskrivelse: "Utvikling av strategi og prosesser for å lede et tverrfaglig designteam.",
-    bilde: "/placeholder.svg?height=400&width=600",
-    kategorier: ["Designledelse", "Teamutvikling", "Prosessforbedring"],
-    år: "2020",
-  },
-]
+import { ArrowUpRight, Instagram } from "lucide-react"
+import Link from "next/link"
+import { projects } from "@/data/projects"
 
 // Prosjektkort-komponent
-function ProsjektKort({ prosjekt }: { prosjekt: (typeof prosjekter)[0] }) {
+function ProsjektKort({ prosjekt }: { prosjekt: (typeof projects)[0] }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -78,7 +28,7 @@ function ProsjektKort({ prosjekt }: { prosjekt: (typeof prosjekter)[0] }) {
 
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-lg font-medium text-gray-900">{prosjekt.tittel}</h3>
+          <h3 className="text-base font-medium text-gray-900 sm:text-lg">{prosjekt.tittel}</h3>
           <span className="text-sm text-gray-500">{prosjekt.år}</span>
         </div>
 
@@ -88,7 +38,7 @@ function ProsjektKort({ prosjekt }: { prosjekt: (typeof prosjekter)[0] }) {
           {prosjekt.kategorier.map((kategori, index) => (
             <span
               key={index}
-              className="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700"
+              className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800"
             >
               {kategori}
             </span>
@@ -96,9 +46,12 @@ function ProsjektKort({ prosjekt }: { prosjekt: (typeof prosjekter)[0] }) {
         </div>
 
         <div className="mt-auto">
-          <button className="inline-flex items-center text-sm font-medium text-green-600 transition-colors hover:text-green-700">
+          <Link
+            href={`/prosjekter/${prosjekt.slug}`}
+            className="inline-flex items-center text-sm font-medium text-emerald-800 transition-colors hover:text-emerald-900"
+          >
             Se prosjekt <ArrowUpRight className="ml-1 h-3 w-3" />
-          </button>
+          </Link>
         </div>
       </div>
     </motion.div>
@@ -126,17 +79,21 @@ export default function Prosjekter() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-12 text-center"
+          className="mb-12 text-left"
         >
           <h1 className="mb-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">prosjekter</h1>
-          <p className="mx-auto max-w-2xl text-lg text-gray-600">
-            En samling av mine utvalgte prosjekter innen UX-design og ledelse. Hvert prosjekt representerer en unik
-            utfordring og tilnærming.
+          <p className="max-w-2xl text-base text-gray-600 sm:text-lg">
+            En samling av mine utvalgte prosjekter innen UX-design og AI-eksperimentering. Hvert prosjekt representerer
+            en utforskning av hvordan design og teknologi kan løse komplekse problemer og skape meningsfulle
+            opplevelser.
+          </p>
+          <p className="mt-2 max-w-2xl text-sm text-gray-500 italic">
+            Merk: Disse prosjektene er alle AI-genererte eksemplere og placeholderre, dette er ikke ekte!
           </p>
         </motion.div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {prosjekter.map((prosjekt) => (
+          {projects.map((prosjekt) => (
             <ProsjektKort key={prosjekt.id} prosjekt={prosjekt} />
           ))}
         </div>
@@ -147,7 +104,21 @@ export default function Prosjekter() {
           transition={{ delay: 0.8, duration: 0.8 }}
           className="mt-16 text-center text-sm text-gray-500"
         >
-          © {new Date().getFullYear()} UXhanne.no
+          <div className="flex flex-col items-center justify-center space-y-2">
+            <div className="flex items-center space-x-2">
+              <a
+                href="https://www.instagram.com/uxhanne"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center text-emerald-800 hover:text-emerald-900 transition-colors"
+                aria-label="Følg oss på Instagram"
+              >
+                <Instagram className="h-4 w-4 mr-1" />
+                <span>@uxhanne</span>
+              </a>
+            </div>
+            <div>© {new Date().getFullYear()} UXhanne.no</div>
+          </div>
         </motion.footer>
       </div>
     </main>

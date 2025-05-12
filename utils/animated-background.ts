@@ -1,5 +1,3 @@
-import { SimplexNoise } from "./simplex-noise"
-
 export function setupAnimatedBackground(
   canvas: HTMLCanvasElement,
   colors: string[] = ["#E8F5E9", "#C8E6C9", "#A5D6A7", "#DCEDC8", "#4ade80"],
@@ -16,114 +14,77 @@ export function setupAnimatedBackground(
   setCanvasDimensions()
   window.addEventListener("resize", setCanvasDimensions)
 
-  // Create SimplexNoise instance
-  const simplex = new SimplexNoise()
-
   // Time variables for animation
   let time = 0
-  const timeStep = 0.002
-
-  // Create gradient background
-  const createGradient = () => {
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
-    gradient.addColorStop(0, "#FFFFFF")
-    gradient.addColorStop(1, "#E8F5E9")
-    return gradient
-  }
+  const timeStep = 0.01
 
   // Animation loop
   const animate = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // Draw gradient background
-    ctx.fillStyle = createGradient()
+    // Create gradient background for the entire canvas
+    const fullGradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
+    fullGradient.addColorStop(0, "#FFFFFF")
+    fullGradient.addColorStop(0.5, "#E8F5E9")
+    fullGradient.addColorStop(1, "#FFFFFF")
+    ctx.fillStyle = fullGradient
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    // Draw organic shapes
-    const numLayers = 3
+    // Only animate the top 50% of the canvas
+    const animationHeight = canvas.height * 0.5
 
-    for (let layer = 0; layer < numLayers; layer++) {
-      const layerOpacity = 0.1 - layer * 0.02
-      const scale = 0.003 + layer * 0.001
-      const yOffset = layer * 100
-      const speed = 1 + layer * 0.2
-      const color = colors[layer % colors.length]
+    // Draw the animated waves only in the top 50%
+    const waveConfigs = [
+      { amplitude: 30, frequency: 0.01, speed: 0.05, color: colors[0], opacity: 0.2 },
+      { amplitude: 20, frequency: 0.02, speed: 0.03, color: colors[1], opacity: 0.2 },
+      { amplitude: 40, frequency: 0.008, speed: 0.07, color: colors[2], opacity: 0.2 },
+      { amplitude: 25, frequency: 0.015, speed: 0.04, color: colors[3], opacity: 0.2 },
+    ]
 
-      ctx.fillStyle = color
-      ctx.globalAlpha = layerOpacity
+    // Draw the waves
+    waveConfigs.forEach((config, index) => {
+      const { amplitude, frequency, speed, color, opacity } = config
 
       ctx.beginPath()
+      ctx.moveTo(0, animationHeight)
 
-      // Create flowing, organic shapes with noise
-      for (let x = 0; x <= canvas.width; x += 5) {
-        // Use noise to create natural, flowing curves
-        const y1 = simplex.noise2D(x * scale, time * speed) * 200 + canvas.height * 0.4 + yOffset
-        const y2 = simplex.noise2D(x * scale + 10, (time + 10) * speed) * 200 + canvas.height * 0.6 + yOffset
+      // Draw the wave
+      for (let x = 0; x <= canvas.width; x++) {
+        // Create a wave that's anchored at the bottom of the animation area
+        // and waves upward with decreasing amplitude as it goes down
+        const baseY = animationHeight
+        const waveY = Math.sin(x * frequency + time * speed + index) * amplitude
 
-        if (x === 0) {
-          ctx.moveTo(x, y1)
-        } else {
-          ctx.lineTo(x, y1)
-        }
+        // Apply a vertical gradient to the wave amplitude (stronger at top, weaker at bottom)
+        const normalizedY = baseY - waveY * (1 - (baseY / animationHeight) * 0.5)
 
-        // Connect to the bottom of the canvas to create a filled shape
-        if (x === canvas.width) {
-          ctx.lineTo(x, canvas.height)
-          ctx.lineTo(0, canvas.height)
-          ctx.closePath()
-        }
+        ctx.lineTo(x, normalizedY)
       }
 
-      ctx.fill()
-    }
+      // Complete the shape by drawing to the bottom corners
+      ctx.lineTo(canvas.width, animationHeight)
+      ctx.lineTo(0, animationHeight)
 
-    // Draw floating organic blobs
-    const numBlobs = 5
-    for (let i = 0; i < numBlobs; i++) {
-      const blobTime = time + i * 100
-      const x = (simplex.noise2D(i * 0.5, blobTime * 0.1) * 0.5 + 0.5) * canvas.width
-      const y = (simplex.noise2D(i * 0.5 + 10, blobTime * 0.1) * 0.5 + 0.5) * canvas.height * 0.8
-      const size = 50 + simplex.noise2D(i, blobTime * 0.2) * 30
-      const color = colors[Math.floor(i % colors.length)]
-
-      ctx.globalAlpha = 0.1
+      // Fill the wave
       ctx.fillStyle = color
-
-      // Draw organic blob
-      ctx.beginPath()
-
-      // Create irregular, organic shape
-      const numPoints = 12
-      for (let j = 0; j < numPoints; j++) {
-        const angle = (j / numPoints) * Math.PI * 2
-        const radius = size * (0.8 + simplex.noise2D(i + j, blobTime * 0.1) * 0.3)
-        const bx = x + Math.cos(angle) * radius
-        const by = y + Math.sin(angle) * radius
-
-        if (j === 0) {
-          ctx.moveTo(bx, by)
-        } else {
-          // Use quadratic curves for smoother shapes
-          const prevAngle = ((j - 1) / numPoints) * Math.PI * 2
-          const prevX = x + Math.cos(prevAngle) * radius
-          const prevY = y + Math.sin(prevAngle) * radius
-
-          const cpX = prevX + (bx - prevX) * 0.5 + simplex.noise2D(i + j, blobTime * 0.05) * 20
-          const cpY = prevY + (by - prevY) * 0.5 + simplex.noise2D(i + j + 10, blobTime * 0.05) * 20
-
-          ctx.quadraticCurveTo(cpX, cpY, bx, by)
-        }
-      }
-
-      ctx.closePath()
+      ctx.globalAlpha = opacity
       ctx.fill()
-    }
+    })
 
-    // Update time for animation
-    time += timeStep
+    // Draw a subtle line at the bottom of the animation area
+    ctx.beginPath()
+    ctx.moveTo(0, animationHeight)
+    ctx.lineTo(canvas.width, animationHeight)
+    ctx.strokeStyle = "#E8F5E9"
+    ctx.lineWidth = 1
+    ctx.globalAlpha = 0.3
+    ctx.stroke()
 
     // Reset global alpha
     ctx.globalAlpha = 1
+
+    // Update time for animation
+    time += timeStep
 
     const animationId = requestAnimationFrame(animate)
     return animationId
